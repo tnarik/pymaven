@@ -23,9 +23,8 @@ import os
 import posixpath
 import tempfile
 
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 import requests
-import six
 
 from . import utils
 from .artifact import Artifact
@@ -156,7 +155,7 @@ class MavenClient(object):
     """ Client for talking to a maven repository
     """
     def __init__(self, *urls):
-        if isinstance(urls, six.string_types):
+        if isinstance(urls, str):
             urls = [urls]
         self._repos = []
         for url in urls:

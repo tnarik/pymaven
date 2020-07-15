@@ -20,8 +20,8 @@ from io import IOBase
 from io import open
 import posixpath
 
-from six.moves.urllib.parse import urlsplit
-from six.moves.urllib.parse import urlunsplit
+from urllib.parse import urlsplit
+from urllib.parse import urlunsplit
 import requests
 
 

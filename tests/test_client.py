@@ -19,7 +19,7 @@ import os
 import tempfile
 import unittest
 
-from six import StringIO
+from io import StringIO
 import requests
 
 from pymaven import Artifact

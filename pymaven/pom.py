@@ -20,7 +20,6 @@ import logging
 import re
 
 from lxml import etree
-import six
 
 from .artifact import Artifact
 from .utils import memoize
@@ -76,7 +75,7 @@ class Pom(Artifact):
         if pom_data is not None:
             # remove all namespaces
             pom_data = strip_namespace(pom_data)
-            if isinstance(pom_data, six.text_type):
+            if isinstance(pom_data, str):
                 pom_data = pom_data.encode('utf-8')
 
             pom_data = etree.fromstring(pom_data, parser=POM_PARSER)
@@ -379,16 +378,16 @@ class Pom(Artifact):
             self._add_dep(dependencies, "compile", dep)
 
         for scope, deps in itertools.chain(
-                six.iteritems(self._find_import_deps()),
-                six.iteritems(self._find_deps()),
-                six.iteritems(self._find_relocations())):
+                self._find_import_deps().items(),
+                self._find_deps().items(),
+                self._find_relocations().items()):
             for dep in deps:
                 self._add_dep(dependencies, scope, dep)
 
         for profile in self._find_profiles():
             for scope, deps in itertools.chain(
-                    six.iteritems(self._find_deps(profile)),
-                    six.iteritems(self._find_relocations(profile))):
+                    self._find_deps(profile).items(),
+                    self._find_relocations(profile).items()):
                 for dep in deps:
                     self._add_dep(dependencies, scope, dep)
         return dependencies
@@ -428,7 +427,7 @@ class Pom(Artifact):
         contents = self._client.get_artifact(self.coordinate).contents
         with contents as fh:
             contents_text = fh.read()
-            if not isinstance(contents_text, six.text_type):
+            if not isinstance(contents_text, str):
                 contents_text = contents_text.decode('utf-8')
             contents_text = strip_namespace(contents_text)
             return etree.fromstring(contents_text, parser=POM_PARSER)

@@ -24,8 +24,6 @@ import functools
 import re
 import sys
 
-import six
-
 from .errors import ArtifactParseError
 from .versioning import VersionRange
 
@@ -77,7 +75,7 @@ class Artifact(object):
         if self is other:
             return 0
         if not isinstance(other, Artifact):
-            if isinstance(other, six.string_types):
+            if isinstance(other, str):
                 try:
                     return cmp(self, Artifact(other))
                 except ArtifactParseError:

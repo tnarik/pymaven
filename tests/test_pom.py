@@ -17,8 +17,7 @@
 
 import unittest
 
-from six import BytesIO
-import six
+from io import BytesIO
 
 from pymaven import VersionRange as VR
 from pymaven import Artifact
@@ -40,7 +39,7 @@ class TestPom(unittest.TestCase):
         for arg in args:
             a = mock.MagicMock(spec=Artifact)
             a.contents = mock.MagicMock(spec=Struct)
-            if isinstance(arg, six.string_types):
+            if isinstance(arg, str):
                 arg = arg.encode("utf-8")
             a.contents.__enter__.return_value = BytesIO(arg)
             side_effect.append(a)
