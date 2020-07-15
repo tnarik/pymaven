@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-
+from collections import OrderedDict
 import itertools
 import logging
 import re
@@ -27,28 +27,38 @@ from .utils import memoize
 from .utils import parse_source
 from .versioning import VersionRange
 
+
 EMPTY_POM = """\
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-          <modelVersion>4.0.0</modelVersion>
-          <groupId>{0.group_id}</groupId>
-          <artifactId>{0.artifact_id}</artifactId>
-          <version>{0.version}</version>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>{0.group_id}</groupId>
+    <artifactId>{0.artifact_id}</artifactId>
+    <version>{0.version}</version>
 </project>
 """
-POM_NAMESPACE = "http://maven.apache.org/POM/4.0.0"
-POM = "{%s}" % (POM_NAMESPACE,)
-POM_NAMESPACE_LEN = len(POM)
+
 POM_PARSER = etree.XMLParser(
     recover=True,
-    remove_comments=True,
+    # we keep comments in case there is a license in the comments
+    remove_comments=False,
     remove_pis=True,
-    )
+    remove_blank_text=True,
+    resolve_entities=False
+)
+
 PROPERTY_RE = re.compile(r'\$\{(.*?)\}')
-STRIP_NAMESPACE_RE = re.compile(POM)
+STRIP_NAMESPACE_RE = re.compile("<project(.|\\s)*?>", re.MULTILINE)
 
 log = logging.getLogger(__name__)
+
+
+def strip_namespace(xml_text):
+    """
+    Return `xml_text` stripping all namespace declaration from the root project
+    tag.
+    """
+    return STRIP_NAMESPACE_RE.sub('<project>', xml_text[xml_text.find('<project'):], count=1)
 
 
 class Pom(Artifact):
@@ -59,12 +69,26 @@ class Pom(Artifact):
 
     __slots__ = ("_client", "_parent", "_dep_mgmt", "_dependencies", "_pom_data", "_properties")
 
-    def __init__(self, coordinate, client=None, pom_data=None):
+    def __init__(self, coordinate=None, client=None, pom_data=None, ns_aware=False):
+        """Create a new Pom instance.
+        `coordinate` is a coordinate string using colon separator conventions
+        """
         if pom_data is not None:
-            pom_data = etree.fromstring(pom_data.encode("utf-8"), parser=POM_PARSER)
+            # remove all namespaces
+            pom_data = strip_namespace(pom_data)
+            if isinstance(pom_data, six.text_type):
+                pom_data = pom_data.encode('utf-8')
+
+            pom_data = etree.fromstring(pom_data, parser=POM_PARSER)
+            if coordinate is None:
+                coordinate = "{}:{}:{}".format(
+                        _findtext(pom_data, 'groupId'),
+                        _findtext(pom_data, 'artifactId'),
+                        _findtext(pom_data, 'version')
+                    )
+
         self._pom_data = pom_data
         self._client = client
-
         # dynamic attributes
         self._parent = None
         self._dep_mgmt = None
@@ -75,7 +99,7 @@ class Pom(Artifact):
     def _find_deps(self, elem=None):
         if elem is None:
             elem = self.pom_data
-        dependencies = {}
+        dependencies = OrderedDict()
 
         # find all non-optional, compile dependencies
         deps = _find(elem, "dependencies")
@@ -123,14 +147,15 @@ class Pom(Artifact):
                 optional = "false"
             # convert optional to boolean
             optional = optional == "true"
-            dependencies.setdefault(scope, set()).add(((group, artifact, version), not optional))
+            dep = ((group, artifact, version), not optional)
+            self._add_dep(dependencies, scope, dep)
         return dependencies
 
     def _find_dependency_management(self, elem=None):
         if elem is None:
             elem = self.pom_data
-        dep_mgmt = {}
-        import_mgmt = {}
+        dep_mgmt = OrderedDict()
+        import_mgmt = OrderedDict()
 
         dependency_management = _find(elem, "dependencyManagement")
         if dependency_management is None:
@@ -171,25 +196,39 @@ class Pom(Artifact):
         import_mgmt.update(dep_mgmt)
         return import_mgmt
 
+    def _add_dep(self, dependencies, scope, dep):
+        """
+        Add a dep tuple to the scope of dependencies. Create a new scope as a list if needed.
+        Do not add duplicate dep.
+        """
+        # note: we do not use a set here to keep the orginal ordering of deps
+        if scope not in dependencies:
+            scope_deps = dependencies[scope] = []
+        else:
+            scope_deps = dependencies[scope]
+        if dep not in scope_deps:
+            scope_deps.append(dep)
+
     def _find_import_deps(self):
-        dependencies = {}
+        dependencies = OrderedDict()
         # process dependency management to find imports
         for group, artifact in self.dependency_management:
             version, scope, optional = self.dependency_management[(group, artifact)]
             if scope == "import":
-                dependencies.setdefault(scope, set()).add(((group, artifact, version), not optional))
+                dep = ((group, artifact, version), not optional)
+                self._add_dep(dependencies, scope, dep)
         return dependencies
 
     def _find_prerequisites(self, elem=None):
         if elem is None:
             elem = self.pom_data
-        properties = {}
+        properties = OrderedDict()
         # get prerequisites
         prereqs = _find(elem, "prerequisites")
         if prereqs is None:
             return properties
         for elem in prereqs:
-            tag = elem.tag[POM_NAMESPACE_LEN:]
+            tag = elem.tag
             properties['prerequisites.' + tag] = elem.text
             properties['project.prerequisites.' + tag] = elem.text
         return properties
@@ -234,15 +273,15 @@ class Pom(Artifact):
     def _find_properties(self, elem=None):
         if elem is None:
             elem = self.pom_data
-        properties = {}
+        properties = OrderedDict()
         project_properties = _find(elem, "properties")
         if project_properties is not None:
             for prop in project_properties.iterchildren():
-                if prop.tag == POM + 'property':
+                if prop.tag == 'property':
                     name = prop.get('name')
                     value = prop.get('value')
                 else:
-                    name = prop.tag[POM_NAMESPACE_LEN:]
+                    name = prop.tag
                     value = prop.text
                 properties[name] = value
         return properties
@@ -250,7 +289,7 @@ class Pom(Artifact):
     def _find_relocations(self, elem=None):
         if elem is None:
             elem = self.pom_data
-        dependencies = {}
+        dependencies = OrderedDict()
         # process distributionManagement for relocation
         distManagement = _find(elem, "distributionManagement")
         if distManagement is None:
@@ -275,13 +314,19 @@ class Pom(Artifact):
             version = self.version
         else:
             version = self._replace_properties(version)
-        dependencies.setdefault("relocation", set()).add(((group, artifact, version), True))
+
+        dep = ((group, artifact, version), True)
+        self._add_dep(dependencies, "relocation", dep)
+
         return dependencies
 
     def _pom_factory(self, group, artifact, version):
         return Pom("%s:%s:pom:%s" % (group, artifact, version), self._client)
 
     def _replace_properties(self, text, properties=None):
+        """
+        Return an updated `text` replacing maven `properties`.
+        """
         if properties is None:
             properties = self.properties
 
@@ -316,39 +361,44 @@ class Pom(Artifact):
         elif spec in ("latest.integration", "latest"):
             return str(artifacts[0].version)
 
-        range = VersionRange.fromstring(spec)
+        vrange = VersionRange.fromstring(spec)
         for artifact in artifacts:
-            if artifact.version in range:
+            if artifact.version in vrange:
                 return str(artifact.version)
 
     @property
     @memoize("_dependencies")
     def dependencies(self):
-        dependencies = {}
+        dependencies = OrderedDict()
         # we depend on our parent
-        if self.parent is not None:
+        if isinstance(self.parent, Pom):
             group = self.parent.group_id
             artifact = self.parent.artifact_id
             version = self.parent.version
-            dependencies.setdefault("compile", set()).add(((group, artifact, str(version)), True))
-        for key, value in itertools.chain(
+            dep = ((group, artifact, version), True)
+            self._add_dep(dependencies, "compile", dep)
+
+        for scope, deps in itertools.chain(
                 six.iteritems(self._find_import_deps()),
                 six.iteritems(self._find_deps()),
                 six.iteritems(self._find_relocations())):
-            dependencies.setdefault(key, set()).update(value)
+            for dep in deps:
+                self._add_dep(dependencies, scope, dep)
+
         for profile in self._find_profiles():
-            for key, value in itertools.chain(
+            for scope, deps in itertools.chain(
                     six.iteritems(self._find_deps(profile)),
                     six.iteritems(self._find_relocations(profile))):
-                dependencies.setdefault(key, set()).update(value)
+                for dep in deps:
+                    self._add_dep(dependencies, scope, dep)
         return dependencies
 
     @property
     @memoize("_dep_mgmt")
     def dependency_management(self):
-        dep_mgmt = {}
+        dep_mgmt = OrderedDict()
         # add parent's block first so we can override it
-        if self.parent is not None:
+        if isinstance(self.parent, Pom):
             dep_mgmt.update(self.parent.dependency_management)
         dep_mgmt.update(self._find_dependency_management())
         for profile in self._find_profiles():
@@ -368,37 +418,55 @@ class Pom(Artifact):
     @property
     @memoize("_pom_data")
     def pom_data(self):
+        """
+        Return an etree from the current POM data. If a client was provided at
+        creation time, use that client to fetch the POM artifact data remotely.
+        """
         if self._client is None:
-            return etree.fromstring(EMPTY_POM.format(self), parser=POM_PARSER)
-        with self._client.get_artifact(self.coordinate).contents as fh:
-            return etree.parse(fh, parser=POM_PARSER)
+            return etree.fromstring(EMPTY_POM.format(self).encode('utf-8'), parser=POM_PARSER)
+
+        contents = self._client.get_artifact(self.coordinate).contents
+        with contents as fh:
+            contents_text = fh.read()
+            if not isinstance(contents_text, six.text_type):
+                contents_text = contents_text.decode('utf-8')
+            contents_text = strip_namespace(contents_text)
+            return etree.fromstring(contents_text, parser=POM_PARSER)
 
     @property
     @memoize("_properties")
     def properties(self):
         properties = {}
-        if self.parent is not None:
+        if isinstance(self.parent, Pom):
             properties.update(self.parent.properties)
+        if isinstance(self.parent, Artifact):
             properties['parent.groupId'] = self.parent.group_id
             properties['parent.artifactId'] = self.parent.artifact_id
-            properties['parent.version'] = str(self.parent.version)
+            properties['parent.version'] = self.parent.version and str(self.parent.version)
             properties['project.parent.groupId'] = self.parent.group_id
             properties['project.parent.artifactId'] = self.parent.artifact_id
-            properties['project.parent.version'] = str(self.parent.version)
+            properties['project.parent.version'] = self.parent.version and str(self.parent.version)
+            properties['pom.parent.groupId'] = self.parent.group_id
+            properties['pom.parent.artifactId'] = self.parent.artifact_id
+            properties['pom.parent.version'] = self.parent.version and str(self.parent.version)
+
         # built-in properties
         properties['artifactId'] = self.artifact_id
         properties['groupId'] = self.group_id
-        properties['version'] = str(self.version)
+        properties['version'] = self.version and str(self.version)
         properties['project.artifactId'] = self.artifact_id
         properties['project.groupId'] = self.group_id
-        properties['project.version'] = str(self.version)
+        properties['project.version'] = self.version and str(self.version)
         properties['pom.artifactId'] = self.artifact_id
         properties['pom.groupId'] = self.group_id
-        properties['pom.version'] = str(self.version)
+        properties['pom.version'] = self.version and str(self.version)
+
         properties.update(self._find_properties())
         properties.update(self._find_prerequisites())
+
         for profile in self._find_profiles():
-            properties.update(self._find_properties(profile))
+            profile_properties = self._find_properties(profile)
+            properties.update(profile_properties)
         return properties
 
     def get_dependencies(self):
@@ -447,15 +515,12 @@ class Pom(Artifact):
 
 
 def _find(elem, tag):
-    tag = tag.replace("/", "/" + POM)
-    return elem.find(POM + tag)
+    return elem.find(tag)
 
 
 def _findall(elem, tag):
-    tag = tag.replace("/", "/" + POM)
-    return elem.findall(POM + tag)
+    return elem.findall(tag)
 
 
 def _findtext(elem, tag):
-    tag = tag.replace("/", "/" + POM)
-    return elem.findtext(POM + tag)
+    return elem.findtext(tag)
