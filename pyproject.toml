@@ -1,15 +1,17 @@
 [tool.poetry]
-name = "tnarik_pymaven"
-version = "0.1.0"
+name = "pymaven"
+version = "0.3.0"
 description = ""
 authors = ["tnarik <tnarik@lecafeautomatique.co.uk>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.5"
 requests = ">=2.7.0"
 lxml = ">=4.1.0"
 
 [tool.poetry.dev-dependencies]
+tox = "^3.17.1"
+tox-pyenv = "^1.1.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
