@@ -6,14 +6,14 @@ env:
     - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
     - SEGFAULT_SIGNALS=all
 python:
-    - '3.5'
-    - '3.6'
-    - '3.7'
-    - '3.8'
+  - '3.5'
+  - '3.6'
+  - '3.7'
+  - '3.8'
 before_install:
-- python --version
-- uname -a
-- lsb_release -a
+  - python --version
+  - uname -a
+  - lsb_release -a
 install:
   - pip install tox-travis
   - virtualenv --version
@@ -29,3 +29,5 @@ notifications:
   email:
     on_success: never
     on_failure: always
+  slack:
+    secure: jzfE6ksk2EmeALekih35aBfDBC8tdnL4MXXJsqkWzmKhRPOHg3At+vdnFz8zcEUVtLzuruHj5X9uTic5lBIK+60c9TxKDrbhV0XEl9R6k+kfOAu2FLcv6g1UOH1XjxYleElb+09k95EIeDKOJ/+7Y7s+mcq8y+Pj2voQZJDNrEuavf5PHB1/P9WWTwTKu/x7laLrQe+Hi395kgzwaaGLJbTp5sq7Ez+yfR/vNRArig5MnxB+ZXH+tJhqfP5L4DUY4YXTUgtK9Ea7WPStI2RGj95GM8CD+21fwgoGqc8cWYERLxJZJ4//W3W2aYsw04ei1Qf+9KAI7JsnCKMyuUw8fDlx7zBKGQ+qMXSuR2wsi4PkH9mInNlLqN9oSbZp/8NrxJwwJwGoJBTBi8nnekqMlTFb5+r2Y0VzX/N8Gm+TPzVU1nLveXdDEDbi/K8e0/EHQih8SQ+gxLFuDoBkHiFkeUIJxX3hLfMQW8LADXJzXnUwUk5dYMDr6t2qDJulElYN6v9byibdMimK+dRXoOIUbcV9khAjxMncw4WPJDADCZ2qIum2LKmDfkpU+6lYWNT7Gsy2zYCwkcAhNOotjgIS3u9nb4yJlHSNNo/bQQGVvNG+euf/XQeoU1QmbLN7Zta8AbwlCR93++Jlrh+VJnZCpCb83SFdeyHCxtm6Ic08TWE=

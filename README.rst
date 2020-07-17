@@ -24,3 +24,11 @@ pyenv install -v 3.6.0
 ...
 brew install python
 ```
+
+
+To configure Slack - Travis integration...
+```
+https://slack.com/signin?redir=/services/new/travis
+```
+
+I selected `lecafeautomatique` and created a `builds` channel
