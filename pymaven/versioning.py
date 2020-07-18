@@ -1,3 +1,4 @@
+# Copyright (c) 2020 Tnarik Innael <tnarik@lecafeautomatique.co.uk>
 #
 # Copyright (c) SAS Institute Inc.
 #
@@ -20,15 +21,13 @@ Versioning of artifacts
 """
 
 import functools
-import sys
 
 from itertools import zip_longest
 
 from .errors import RestrictionParseError
 from .errors import VersionRangeParseError
 
-if sys.version_info > (2,):
-    from .utils import cmp
+from .utils import cmp
 
 EXCLUSIVE_CLOSE = ')'
 EXCLUSIVE_OPEN = '('

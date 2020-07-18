@@ -1,3 +1,4 @@
+# Copyright (c) 2020 Tnarik Innael <tnarik@lecafeautomatique.co.uk>
 #
 # Copyright (c) SAS Institute Inc.
 #
@@ -22,13 +23,11 @@ in a maven repository
 
 import functools
 import re
-import sys
 
 from .errors import ArtifactParseError
 from .versioning import VersionRange
 
-if sys.version_info > (2,):
-    from .utils import cmp
+from .utils import cmp
 
 MAVEN_COORDINATE_RE = re.compile(
     r'(?P<group_id>[^:]+)'

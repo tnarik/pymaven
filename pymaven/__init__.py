@@ -1,3 +1,4 @@
+# Copyright (c) 2020 Tnarik Innael <tnarik@lecafeautomatique.co.uk>
 #
 # Copyright (c) SAS Institute Inc.
 #
@@ -19,4 +20,4 @@ from .artifact import Artifact
 from .versioning import Version
 from .versioning import VersionRange
 
-__all__ = ["Artifact", "Version", "VersionRange"]
+__version__ = '0.3.0'
