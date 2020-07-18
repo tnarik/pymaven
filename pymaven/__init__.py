@@ -15,9 +15,8 @@
 # limitations under the License.
 #
 
-
-from .artifact import Artifact
-from .versioning import Version
-from .versioning import VersionRange
+#from .artifact import Artifact
+#from .versioning import Version
+#from .versioning import VersionRange
 
 __version__ = '0.3.0'
