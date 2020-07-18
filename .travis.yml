@@ -2,16 +2,19 @@ language: python
 cache: pip
 env:
 python:
+  - '3.8'
   - '3.5'
   - '3.6'
   - '3.7'
-  - '3.8'
+addons:
+  homebrew:
+    packages:
+      - pyenv
 jobs:
   include:
     - os: osx
       language: generic
       before_install: 
-        - brew install pyenv
         - pyenv install -v 3.5.0
         - pyenv install -v 3.6.1
         - pyenv install -v 3.7.0
