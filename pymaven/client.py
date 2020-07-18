@@ -343,4 +343,4 @@ class LocalRepository(AbstractRepository):
 
         The caller is responsible for calling close on the object
         """
-        return open(self._join(path))  
+        return open(self._join(path))
