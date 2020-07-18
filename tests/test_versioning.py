@@ -20,8 +20,8 @@ Test version handling
 """
 import unittest
 
-from pymaven import Version
-from pymaven import VersionRange
+from pymaven.versioning import Version
+from pymaven.versioning import VersionRange
 from pymaven.errors import RestrictionParseError
 from pymaven.errors import VersionRangeParseError
 from pymaven.versioning import Restriction

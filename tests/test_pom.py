@@ -19,8 +19,8 @@ import unittest
 
 from io import BytesIO
 
-from pymaven import VersionRange as VR
-from pymaven import Artifact
+from pymaven.versioning import VersionRange as VR
+from pymaven.artifact import Artifact
 from pymaven.client import MavenClient
 from pymaven.client import Struct
 from pymaven.pom import Pom

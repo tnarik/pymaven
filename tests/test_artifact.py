@@ -17,7 +17,7 @@
 
 import unittest
 
-from pymaven import Artifact
+from pymaven.artifact import Artifact
 from pymaven.errors import ArtifactParseError
 
 

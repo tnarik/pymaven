@@ -22,7 +22,7 @@ import unittest
 from io import StringIO
 import requests
 
-from pymaven import Artifact
+from pymaven.artifact import Artifact
 from pymaven.client import HttpRepository
 from pymaven.client import LocalRepository
 from pymaven.client import MavenClient
