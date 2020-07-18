@@ -46,8 +46,8 @@ ALIASES = {
 }
 
 
-def list2tuple(l):
-    return tuple(list2tuple(x) if isinstance(x, list) else x for x in l)
+def list2tuple(_list):
+    return tuple(list2tuple(x) if isinstance(x, list) else x for x in _list)
 
 
 @functools.total_ordering
@@ -459,17 +459,17 @@ class Version(object):
         else:
             raise RuntimeError("other is of invalid type: %s" % type(other))
 
-    def _list_compare(self, l, other):
+    def _list_compare(self, _list, other):
         if other is None:
-            if len(l) == 0:
+            if len(_list) == 0:
                 return 0
-            return self._compare(l[0], other)
+            return self._compare(_list[0], other)
         if isinstance(other, int):
             return -1
         elif isinstance(other, str):
             return 1
         elif isinstance(other, (list, tuple)):
-            for left, right in zip_longest(l, other):
+            for left, right in zip_longest(_list, other):
                 if left is None:
                     if right is None:
                         result = 0
@@ -484,26 +484,26 @@ class Version(object):
         else:
             raise RuntimeError("other is of invalid type: %s" % type(other))
 
-    def _new_list(self, l):
+    def _new_list(self, _list):
         """Create a new sublist, append it to the current list and return the
         sublist
 
-        :param list l: list to add a sublist to
+        :param list _list: list to add a sublist to
         :return: the sublist
         :rtype: list
         """
-        l = self._normalize(l)
+        _list = self._normalize(_list)
         sublist = []
-        l.append(sublist)
+        _list.append(sublist)
         return sublist
 
-    def _normalize(self, l):
-        for item in l[::-1]:
+    def _normalize(self, _list):
+        for item in _list[::-1]:
             if not item:
-                l.pop()
+                _list.pop()
             elif not isinstance(item, list):
                 break
-        return l
+        return _list
 
     def _string_compare(self, s, other):
         """Compare string item `s` to `other`
