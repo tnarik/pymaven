@@ -14,7 +14,7 @@ jobs:
   include:
     - os: linux
       python: 3.8
-      env: TOXENV=lint,report
+      env: TOXENV=lint
     - os: osx
       language: generic
       before_install:
@@ -45,6 +45,8 @@ install:
   - pip install tox-pyenv # This is the only dependency duplication
 script:
   - tox
+after_success+:
+  - codecov
 after_failure:
   - more .tox/log/* | cat
   - more .tox/*/log/* | cat
