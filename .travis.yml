@@ -42,4 +42,7 @@ after_failure:
   - more .tox/*/log/* | cat
 notifications:
   slack:
-    secure: rqCPfIv+9JqYftb1Iy9+CLhM9CmWscN5Dqr8oZoProP6YCuYFa2kuRIuKszCorqVOrqJaml/A0+ks0UoAHy6oSQf9S90nNR69CtJfHZ7DOABe7OInWRLLrGpRlq75wBYNB+WE4GYyIF4bc41DCM5HNLg9y9DrLOzmLMWsRUN6ghbtSVNu+pyoOLIzcwE84voJEjZQqJoXgpGmeOPueJelNDl3pFuitgikkQVAZGna0ve6pNyDtQn6i6wGQ9pvz7kHcNpwQjpjhmlLw/CLturLvzEgu/c0gxiiiAc4N1OBt/jZYEtGze0nYmDsFm976DtGdYJUGqlc+rlgLmCe882IPC6x5kuiE5B/EFzMHvrDZ43PZm+/OWmSjuwUw9VzgKO3Kwe7NbAkDZs+qklMkxPM3C8aUrzi2IqPGeW3RSUow3XYAU/hbxuEEOUbiQZK9Zwqe89PenzNRd0DLURv1cY33u6bxJvb+F/yk7oYlODC+ldubkNsKnp16tDdZHYbVZQbwoRBRvIATr0zZuizcEyjpQfpU/Q2J4DdCaiS4tXfWAcwWZdz4tJ5EsFb/dw1M3v01YH5jWMNYS8KFDWYfQESTdTUTjEPwwEc9jZFE/6a4TrjGsozJevw1DWFtPYqyzFLLPlDtVZFDB/fy5i19McdIjgZi/9chV3dCJug07AGr0=
+  template:
+    - "%{repository_slug}@%{branch} (<%{compare_url}|%{commit}>)"
+    - "Build details: <%{build_url}|#%{build_number}> by %{author} %{result} in %{duration}"
+  secure: rqCPfIv+9JqYftb1Iy9+CLhM9CmWscN5Dqr8oZoProP6YCuYFa2kuRIuKszCorqVOrqJaml/A0+ks0UoAHy6oSQf9S90nNR69CtJfHZ7DOABe7OInWRLLrGpRlq75wBYNB+WE4GYyIF4bc41DCM5HNLg9y9DrLOzmLMWsRUN6ghbtSVNu+pyoOLIzcwE84voJEjZQqJoXgpGmeOPueJelNDl3pFuitgikkQVAZGna0ve6pNyDtQn6i6wGQ9pvz7kHcNpwQjpjhmlLw/CLturLvzEgu/c0gxiiiAc4N1OBt/jZYEtGze0nYmDsFm976DtGdYJUGqlc+rlgLmCe882IPC6x5kuiE5B/EFzMHvrDZ43PZm+/OWmSjuwUw9VzgKO3Kwe7NbAkDZs+qklMkxPM3C8aUrzi2IqPGeW3RSUow3XYAU/hbxuEEOUbiQZK9Zwqe89PenzNRd0DLURv1cY33u6bxJvb+F/yk7oYlODC+ldubkNsKnp16tDdZHYbVZQbwoRBRvIATr0zZuizcEyjpQfpU/Q2J4DdCaiS4tXfWAcwWZdz4tJ5EsFb/dw1M3v01YH5jWMNYS8KFDWYfQESTdTUTjEPwwEc9jZFE/6a4TrjGsozJevw1DWFtPYqyzFLLPlDtVZFDB/fy5i19McdIjgZi/9chV3dCJug07AGr0=
