@@ -2,10 +2,10 @@ language: python
 cache: pip
 env:
 python:
-  - '3.8'
   - '3.5'
   - '3.6'
   - '3.7'
+  - '3.8'
 addons:
   homebrew:
     packages:
@@ -18,18 +18,21 @@ jobs:
         - pyenv install -v 3.5.6
         - pyenv local 3.5.6
       env: PYENV_VERSION=3.5.6
+        TOXENV=py35
     - os: osx
       language: generic
       before_install:
         - pyenv install -v 3.6.1
         - pyenv local 3.6.1
       env: PYENV_VERSION=3.6.1
+        TOXENV=py36
     - os: osx
       language: generic
       before_install:
         - pyenv install -v 3.7.0
         - pyenv local 3.7.0
       env: PYENV_VERSION=3.7.0
+        TOXENV=py37
 install:
   - pip install tox-travis
 script:
