@@ -14,7 +14,7 @@ jobs:
   include:
     - os: linux
       python: 3.8
-      env: TOXKENV=lint-report
+      env: TOXENV=lint-report
     - os: osx
       language: generic
       before_install:
@@ -34,10 +34,14 @@ jobs:
         - pyenv local 3.7.0
       env: TOXENV=py37
 install:
+  - pip list
+  - python -V
   - python -m pip install -U pip
   - pip install tox-travis
-  - pip install tox-pyenv
+  - pip install tox-pyenv # This is the only dependency duplication
 script:
+  - python -V
+  - pip list
   - tox
 after_failure:
   - more .tox/log/* | cat
