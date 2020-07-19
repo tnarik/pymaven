@@ -1,8 +1,10 @@
+codecov:
+  require_ci_to_pass: no
 coverage:
   status:
     project:
       default:
-        target: 80%
+        target: 90%
   notify:
     slack:
       default:
