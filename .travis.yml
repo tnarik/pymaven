@@ -33,6 +33,8 @@ jobs:
         - pyenv local 3.7.0
       env: PYENV_VERSION=3.7.0
         TOXENV=py37
+install:
+  - pip install tox
 script:
   - tox
 after_failure:
