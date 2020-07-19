@@ -12,27 +12,27 @@ addons:
       - pyenv
 jobs:
   include:
+    - os: linux
+      python: 3.8
+      env: TOXKENV=lint-report
     - os: osx
       language: generic
       before_install:
         - pyenv install -v 3.5.6
         - pyenv local 3.5.6
-      env:
-        TOXENV=py35
+      env: TOXENV=py35
     - os: osx
       language: generic
       before_install:
         - pyenv install -v 3.6.1
         - pyenv local 3.6.1
-      env:
-        TOXENV=py36
+      env: TOXENV=py36
     - os: osx
       language: generic
       before_install:
         - pyenv install -v 3.7.0
         - pyenv local 3.7.0
-      env:
-        TOXENV=py37
+      env: TOXENV=py37
 install:
   - python -m pip install -U pip
   - pip install tox-travis
