@@ -1,5 +1,5 @@
 codecov:
-  require_ci_to_pass: no
+  require_ci_to_pass: yes
 coverage:
   status:
     project:
@@ -9,3 +9,4 @@ coverage:
     slack:
       default:
         url: "secret:Pf4awvfjSFRWbTbH3UZoQulNocK1YtmoWHz4ABT4KK51/1OEwjtAQKQWa/AZMVQ8NcuOrDkQdAFKgJ38HagRPVa+5Atw79COHgAuEfYdivBeVARPgQT9do2PWuvx1ViWqtJFWGJtIBg4EdsoYqYZmwrHKJWEszXNWVY55bsZo2Q="
+        threshold: 1%
