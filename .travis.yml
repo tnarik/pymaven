@@ -5,13 +5,17 @@ python:
   - '3.5'
   - '3.6'
   - '3.7'
-  - '3.8'
 addons:
   homebrew:
     packages:
       - pyenv
 jobs:
   include:
+    - os: linux
+      python: 3.8
+      after_success:
+        - pip install codecov
+        - codecov
     - os: linux
       python: 3.8
       env: TOXENV=lint
@@ -43,11 +47,8 @@ install:
   - python -m pip install -U pip
   - pip install tox-travis
   - pip install tox-pyenv # This is the only dependency duplication
-  - pip install codecov
 script:
   - tox
-after_success+:
-  - codecov
 after_failure:
   - more .tox/log/* | cat
   - more .tox/*/log/* | cat
